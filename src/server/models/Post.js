@@ -30,3 +30,21 @@ Post.schema.virtual('content.full').get(function () {
 
 Post.defaultColumns = 'title, state|20%, author|20%, publishedDate|20%';
 Post.register();
+
+var exports = module.exports = {};
+
+exports.loadPosts = function(cb) {
+	var q = keystone.list('Post').model.find().where('state', 'published').sort('-publishedDate').populate('author').limit('4');
+
+	q.exec(cb);
+};
+
+exports.loadCurrentPost = function(postFilter, cb) {
+
+	const q = keystone.list('Post').model.findOne({
+		state: 'published',
+		slug: postFilter
+	}).populate('author categories');
+
+	q.exec(cb);
+};
