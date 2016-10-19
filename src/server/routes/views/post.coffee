@@ -1,27 +1,28 @@
 keystone = require 'keystone'
-postModel = require '../../models/Post'
+# postModel = require '../../models/Post'
+Post = keystone.list 'Post'
 
-exports = module.exports = (req, res) -> 
+exports = module.exports = (req, res) ->
 
 	view = new keystone.View(req, res)
 	locals = res.locals
 
 	#	Set locals
 	locals.section = 'blog'
-	locals.filters = 
+	locals.filters =
 		post: req.params.post
 	locals.data =
 		posts: []
 
 	#	Load the current post
 	view.on 'init', (next) ->
-		postModel.loadCurrentPost locals.filters.post, (err, results) ->
+		Post.model.loadCurrentPost locals.filters.post, (err, results) ->
 			locals.data.post = results
 			next err
 
 	# Load other posts
 	view.on 'init', (next) ->
-		postModel.loadPosts (err, results) ->
+		Post.model.loadPosts (err, results) ->
 			locals.data.posts = results
 			next err
 

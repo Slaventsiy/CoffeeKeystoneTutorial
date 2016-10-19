@@ -15,63 +15,66 @@ Post = new keystone.List 'Post',
 		unique: true
 
 Post.add
-	title: 
+	title:
 		type: String
 		required: true
-	state: 
+	state:
 		type: Types.Select
 		options: 'draft, published, archived'
 		default: 'draft'
 		index: true
-	author: 
+	author:
 		type: Types.Relationship
 		ref: 'User'
 		index: true
-	publishedDate: 
+	publishedDate:
 		type: Types.Date
 		index: true
-		dependsOn: 
+		dependsOn:
 			state: 'published'
-	image: 
+	image:
 		type: Types.CloudinaryImage
 	content:
-		brief: 
+		brief:
 			type: Types.Html
 			wysiwyg: true
 			height: 150
-		extended: 
+		extended:
 			type: Types.Html
 			wysiwyg: true
 			height: 400
-	categories: 
+	categories:
 		type: Types.Relationship
 		ref: 'PostCategory'
 		many: true
 
 Post.schema.virtual 'content.full'
-	.get -> @content.extended || @content.brief
+	.get -> @content.extended or @content.brief
 
-Post.defaultColumns = 'title, state|20%, author|20%, publishedDate|20%'
-Post.register()
 
-exports = module.exports = {}
-
-exports.loadPosts = (cb) ->
-	keystone.list 'Post'
-		.model
+Post
+	.schema
+	.statics
+	.loadPosts = (cb) ->
+		# Post.model == @
+		@
 			.find()
 			.where 'state', 'published'
 			.sort '-publishedDate'
-	.populate 'author'
-		.limit '4'
-	.exec cb
+			.limit '4'
+			.populate 'author'
+			.exec cb
 
-exports.loadCurrentPost = (postFilter, cb) ->
-
-	keystone.list('Post')
-		.model
+Post
+	.schema
+	.statics
+	.loadCurrentPost = (postFilter, cb) ->
+		@
 			.findOne
 				state: 'published'
 				slug: postFilter
-		.populate 'author categories'
-		.exec cb
+			.populate 'author categories'
+			.exec cb
+
+Post.defaultColumns = 'title, state|20%, author|20%, publishedDate|20%'
+Post.register()
